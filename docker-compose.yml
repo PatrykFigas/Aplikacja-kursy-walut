@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/code
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/exchange_rates
+    depends_on:
+      - db
+
   db:
     image: postgres
     restart: always
