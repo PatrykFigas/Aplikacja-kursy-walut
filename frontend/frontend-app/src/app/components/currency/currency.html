@@ -1,1 +1,29 @@
-<p>currency works!</p>
+<div class="container mt-4">
+  <h2 class="mb-3">Kursy walut (NBP)</h2>
+  <p><strong>Data publikacji:</strong> {{ publishDate }}</p>
+
+  <input
+  type="text"
+  class="form-control mb-3"
+  placeholder="Szukaj waluty..."
+  [(ngModel)]="searchTerm"
+  (input)="onSearch()"
+/>
+
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>Waluta</th>
+        <th>Kod</th>
+        <th>Kurs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let rate of filteredRates">
+        <td>{{ rate.currency }}</td>
+        <td>{{ rate.code }}</td>
+        <td>{{ rate.mid }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
