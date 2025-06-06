@@ -1,0 +1,60 @@
+<div class="full-height">
+  <div class="currency-card">
+    <h2 class="fw-bold text-center text-primary mb-3">Kursy walut (NBP)</h2>
+
+    <p class="text-center text-muted mb-4">
+      <strong>Data publikacji:</strong> {{ publicationDate }}
+    </p>
+
+    <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3 mb-4">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        class="form-control"
+        placeholder="Szukaj waluty (np. USD)"
+        style="max-width: 300px;"
+      />
+
+      <select class="form-select w-auto" [(ngModel)]="groupBy" (change)="groupData()">
+        <option value="none">Brak grupowania</option>
+        <option value="years">Lata</option>
+        <option value="quarters">Kwartały</option>
+        <option value="months">Miesiące</option>
+        <option value="days">Dni</option>
+      </select>
+    </div>
+
+    <!-- Tabela zwykła -->
+    <div *ngIf="groupBy === 'none'" class="table-responsive">
+      <table class="table align-middle text-center">
+        <thead>
+          <tr>
+            <th class="text-start">Waluta</th>
+            <th>Kod</th>
+            <th>Kurs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let currency of filteredCurrencies()">
+            <td class="text-start">{{ currency.currency }}</td>
+            <td><span class="badge text-bg-primary px-3 py-2">{{ currency.code }}</span></td>
+            <td><strong>{{ currency.mid | number: '1.4-4' }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tabela grupowana -->
+    <div *ngIf="groupBy !== 'none'" class="table-responsive">
+      <table class="table align-middle text-center">
+        <thead>
+          <tr>
+            <th>Grupa</th>
+            <th>Średni kurs</th>
+            <th>Liczba walut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of groupedCurrencies">
+            <td>{{ row.group }}</td>
+            <td><strong>{{ row.avg }}</strong>

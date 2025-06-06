@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { CurrencyComponent } from './components/currency/currency.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CurrencyComponent],
-  templateUrl: './app.html',
+  imports: [CurrencyComponent],
+  template: `<app-currency></app-currency>`,
+  styleUrls: ['./app.css'],
 })
 export class AppComponent {}
