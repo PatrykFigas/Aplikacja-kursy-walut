@@ -11,74 +11,51 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./currency.component.css'],
 })
 export class CurrencyComponent implements OnInit {
-  currencies: CurrencyRate[] = [];
-  groupedCurrencies: any[] = [];
-  publicationDate = '';
-  searchTerm = '';
-  groupBy: 'none' | 'years' | 'quarters' | 'months' | 'days' = 'none';
+  availableCurrencies: CurrencyRate[] = [];
+  currencyCode = '';
+  currencyName = '';
+  startDate = '';
+  endDate = '';
+  rates: { date: string; rate: number }[] = [];
+  error = '';
 
   constructor(private currencyService: CurrencyService) {}
 
   ngOnInit(): void {
     this.currencyService.getTodayRates().subscribe({
-      next: (data: { rates: CurrencyRate[]; effectiveDate: string }) => {
-        this.currencies = data.rates;
-        this.publicationDate = data.effectiveDate;
-        this.groupData();
+      next: (data) => {
+        this.availableCurrencies = data.rates;
+        if (this.availableCurrencies.length > 0) {
+          this.currencyCode = this.availableCurrencies[0].code;
+        }
       },
-      error: (err: any) => console.error('Błąd pobierania kursów:', err),
+      error: () => {
+        this.error = 'Nie udało się pobrać listy walut.';
+      },
     });
   }
 
-  filteredCurrencies(): CurrencyRate[] {
-    if (!this.searchTerm) return this.currencies;
-
-    const term = this.searchTerm.toLowerCase();
-    return this.currencies.filter(
-      (currency) =>
-        currency.currency.toLowerCase().includes(term) ||
-        currency.code.toLowerCase().includes(term)
-    );
-  }
-
-  groupData(): void {
-    if (this.groupBy === 'none') {
-      this.groupedCurrencies = this.currencies;
+  fetchRates(): void {
+    this.error = '';
+    if (!this.currencyCode || !this.startDate || !this.endDate) {
+      this.error = 'Uzupełnij wszystkie pola.';
       return;
     }
 
-    const grouped = new Map<string, CurrencyRate[]>();
-
-    this.currencies.forEach((entry) => {
-      const key = this.getGroupKey(this.publicationDate, this.groupBy);
-      if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key)!.push(entry);
-    });
-
-    this.groupedCurrencies = Array.from(grouped.entries()).map(([group, entries]) => ({
-      group,
-      avg: (entries.reduce((sum, e) => sum + e.mid, 0) / entries.length).toFixed(4),
-      count: entries.length,
-    }));
-  }
-
-  getGroupKey(date: string, type: string): string {
-    const d = new Date(date);
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;
-    const q = Math.floor((m - 1) / 3) + 1;
-
-    switch (type) {
-      case 'years':
-        return `${y}`;
-      case 'quarters':
-        return `Q${q} ${y}`;
-      case 'months':
-        return `${y}-${String(m).padStart(2, '0')}`;
-      case 'days':
-        return date;
-      default:
-        return '';
-    }
+    this.currencyService
+      .getRatesForPeriod(this.currencyCode, this.startDate, this.endDate)
+      .subscribe({
+        next: (data) => {
+          this.rates = data.rates.map((r: any) => ({
+            date: r.effectiveDate,
+            rate: r.mid,
+          }));
+          this.currencyName = data.currency;
+        },
+        error: () => {
+          this.rates = [];
+          this.error = 'Nie udało się pobrać danych. Sprawdź daty i kod waluty.';
+        },
+      });
   }
 }

@@ -1,60 +1,55 @@
 <div class="full-height">
   <div class="currency-card">
-    <h2 class="fw-bold text-center text-primary mb-3">Kursy walut (NBP)</h2>
+    <h2 class="fw-bold text-center text-primary mb-4">Kursy walut NBP (zakres dat)</h2>
 
-    <p class="text-center text-muted mb-4">
-      <strong>Data publikacji:</strong> {{ publicationDate }}
-    </p>
+    <div class="row mb-4 justify-content-center g-3">
+      <div class="col-md-auto">
+        <label>Waluta</label>
+        <select [(ngModel)]="currencyCode" class="form-select">
+          <option *ngFor="let c of availableCurrencies" [value]="c.code">
+            {{ c.currency }} ({{ c.code }})
+          </option>
+        </select>
+      </div>
 
-    <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3 mb-4">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        class="form-control"
-        placeholder="Szukaj waluty (np. USD)"
-        style="max-width: 300px;"
-      />
+      <div class="col-md-auto">
+        <label>Data od</label>
+        <input [(ngModel)]="startDate" type="date" class="form-control" />
+      </div>
 
-      <select class="form-select w-auto" [(ngModel)]="groupBy" (change)="groupData()">
-        <option value="none">Brak grupowania</option>
-        <option value="years">Lata</option>
-        <option value="quarters">Kwartały</option>
-        <option value="months">Miesiące</option>
-        <option value="days">Dni</option>
-      </select>
+      <div class="col-md-auto">
+        <label>Data do</label>
+        <input [(ngModel)]="endDate" type="date" class="form-control" />
+      </div>
+
+      <div class="col-md-auto d-flex align-items-end">
+        <button class="btn btn-primary w-100" (click)="fetchRates()">Pobierz</button>
+      </div>
     </div>
 
-    <!-- Tabela zwykła -->
-    <div *ngIf="groupBy === 'none'" class="table-responsive">
-      <table class="table align-middle text-center">
+    <div *ngIf="error" class="alert alert-danger text-center">
+      {{ error }}
+    </div>
+
+    <div *ngIf="rates.length > 0" class="table-responsive">
+      <h5 class="mb-3 text-center text-muted">
+        {{ currencyName | titlecase }} ({{ currencyCode.toUpperCase() }})
+      </h5>
+
+      <table class="table text-center align-middle">
         <thead>
           <tr>
-            <th class="text-start">Waluta</th>
-            <th>Kod</th>
+            <th>Data</th>
             <th>Kurs</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let currency of filteredCurrencies()">
-            <td class="text-start">{{ currency.currency }}</td>
-            <td><span class="badge text-bg-primary px-3 py-2">{{ currency.code }}</span></td>
-            <td><strong>{{ currency.mid | number: '1.4-4' }}</strong></td>
+          <tr *ngFor="let rate of rates">
+            <td>{{ rate.date }}</td>
+            <td><strong>{{ rate.rate | number: '1.4-4' }} zł</strong></td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <!-- Tabela grupowana -->
-    <div *ngIf="groupBy !== 'none'" class="table-responsive">
-      <table class="table align-middle text-center">
-        <thead>
-          <tr>
-            <th>Grupa</th>
-            <th>Średni kurs</th>
-            <th>Liczba walut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of groupedCurrencies">
-            <td>{{ row.group }}</td>
-            <td><strong>{{ row.avg }}</strong>
+  </div>
+</div>

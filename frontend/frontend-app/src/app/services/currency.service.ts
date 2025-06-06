@@ -24,4 +24,9 @@ export class CurrencyService {
         }))
       );
   }
+
+  getRatesForPeriod(code: string, start: string, end: string): Observable<any> {
+    const url = `https://api.nbp.pl/api/exchangerates/rates/A/${code}/${start}/${end}/?format=json`;
+    return this.http.get<any>(url);
+  }
 }
